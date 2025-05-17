@@ -68,6 +68,10 @@ int *load_vertex_from_file(int *buffer_size) {
   return data;
 }
 
+void matmult(int input_vertex[3], int matrix[3][3], int output_vertex) {
+// TODO
+}
+
 void rotate_and_project(int* output_data, int* data, int data_size, float rotation[3]) {
   float data_buffer[3];
 
