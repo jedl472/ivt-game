@@ -74,7 +74,7 @@ void rotate_and_project(int* output_data, int* data, int data_size, float rotati
   float rot_x[9];
   rotation_matrix_x(rot_x, rotation[0]);
   
-  for (int i = 1; i < data_size; i++) {
+  for (int i = 0; i < data_size; i++) {
     // printf("data\n");
 
     data_buffer[0] = data[3 * i + 0];    // load 1 vertex into temporary buffer
