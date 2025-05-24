@@ -4,35 +4,13 @@
 #include <string.h>
 
 #define VERTEX_FILE "cube.txt"
-#define OUT_FILE "test.txt"
+#define OUT_FILE "rendered.txt"
 
 #define PROJECTION_SCALE 5
 #define PROJECTION_OFFSET_XY -20
 
 #define SCREEN_WIDTH 50
 #define SCREEN_HEIGTH 50
-
-
-void multiplyMatrix(int m1[R1 1][C1 3], int m2[R2 3][C2 3])
-{
-    int result[R1][C2];
-
-    printf("Resultant Matrix is:\n");
-
-    for (int i = 0; i < R1; i++) {
-        for (int j = 0; j < C2; j++) {
-            result[i][j] = 0;
-
-            for (int k = 0; k < R2; k++) {
-                result[i][j] += m1[i][k] * m2[k][j];
-            }
-
-            printf("%d\t", result[i][j]);
-        }
-
-        printf("\n");
-    }
-}
 
 
 void rotation_matrix_x(float* output_matrix, float theta) {
@@ -42,6 +20,15 @@ void rotation_matrix_x(float* output_matrix, float theta) {
   memcpy(output_matrix, _matrix, sizeof _matrix);
 } 
 
+void matmult(const float vec[3], const float mat[3][3], float result[3]) {
+    for (int i = 0; i < 3; i++) {
+        result[i] = 0.0f;
+        for (int j = 0; j < 3; j++) {
+            result[i] += vec[j] * mat[j][i]; // Note: Vector is treated as a row vector
+      //
+        }
+    }
+}
 
 int *load_vertex_from_file(int *buffer_size) {
   int data_index = 0;
@@ -92,15 +79,12 @@ int *load_vertex_from_file(int *buffer_size) {
   return data;
 }
 
-void matmult(int input_vertex[3], int matrix[3][3], int output_vertex) {
-// TODO
-}
-
 void rotate_and_project(int* output_data, int* data, int data_size, float rotation[3]) {
   float data_buffer[3];
+  float data_buffer_rotated[3];
 
-  float rot_x[9];
-  rotation_matrix_x(rot_x, rotation[0]);
+  float rot_x[3][3];
+  rotation_matrix_x(*rot_x, rotation[0]);
   
   for (int i = 0; i < data_size; i++) {
     // printf("data\n");
@@ -112,7 +96,7 @@ void rotate_and_project(int* output_data, int* data, int data_size, float rotati
     printf("Buffer: %f %f %f\n", data_buffer[0], data_buffer[1], data_buffer[2]);
 
     // TODO: magic matrix multiplication step
-    multiplyMatrix(data_buffer, rotation_matrix_x);
+    matmult(data_buffer, rot_x, data_buffer_rotated);
 
     output_data[2 * i + 0] = (data_buffer[0] / data_buffer[2]) * PROJECTION_SCALE;
     output_data[2 * i + 1] = (data_buffer[1] / data_buffer[2]) * PROJECTION_SCALE;
