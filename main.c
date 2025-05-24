@@ -6,10 +6,34 @@
 #define VERTEX_FILE "cube.txt"
 #define OUT_FILE "test.txt"
 
-#define PROJECTION_SCALE 10
+#define PROJECTION_SCALE 5
+#define PROJECTION_OFFSET_XY -20
 
 #define SCREEN_WIDTH 50
-#define SCREEN_HEIGTH 20
+#define SCREEN_HEIGTH 50
+
+
+void multiplyMatrix(int m1[R1 1][C1 3], int m2[R2 3][C2 3])
+{
+    int result[R1][C2];
+
+    printf("Resultant Matrix is:\n");
+
+    for (int i = 0; i < R1; i++) {
+        for (int j = 0; j < C2; j++) {
+            result[i][j] = 0;
+
+            for (int k = 0; k < R2; k++) {
+                result[i][j] += m1[i][k] * m2[k][j];
+            }
+
+            printf("%d\t", result[i][j]);
+        }
+
+        printf("\n");
+    }
+}
+
 
 void rotation_matrix_x(float* output_matrix, float theta) {
   float _matrix[3][3] = {{1, 0, 0},
@@ -84,6 +108,7 @@ void rotate_and_project(int* output_data, int* data, int data_size, float rotati
     printf("Buffer: %f %f %f\n", data_buffer[0], data_buffer[1], data_buffer[2]);
 
     // TODO: magic matrix multiplication step
+    multiplyMatrix(data_buffer, rotation_matrix_x);
 
     output_data[2 * i + 0] = (data_buffer[0] / data_buffer[2]) * PROJECTION_SCALE;
     output_data[2 * i + 1] = (data_buffer[1] / data_buffer[2]) * PROJECTION_SCALE;
@@ -95,14 +120,14 @@ void rotate_and_project(int* output_data, int* data, int data_size, float rotati
 }
 
 void render_verticies(int* vertex_data, int data_size, FILE* stream) {
-  char row[SCREEN_WIDTH * 2 + 1];
+  char row[SCREEN_WIDTH * 2 + 1] = {0};
   for (int y = 0; y < SCREEN_HEIGTH; y++) {
+    for (int i = 0; i < SCREEN_WIDTH; i++) { row[i*2] = '.'; }
     for (int x = 0; x < SCREEN_WIDTH; x++) {
       for (int i = 0; i < data_size; i++) {
-        if (vertex_data[2 * i + 0] == x && vertex_data[2 * i + 1] == y) {
+        // printf(" tested x: %i %i tested y: %i %i\n", vertex_data[2 * i + 0], x, vertex_data[2 * i + 1], y);
+        if (vertex_data[2 * i + 0] == (x + PROJECTION_OFFSET_XY) && vertex_data[2 * i + 1] == (y + PROJECTION_OFFSET_XY)) {
           row[x*2] = 'x';
-        } else {
-          row[x*2] = '.';
         }
         row[x*2 + 1] = ' ';
       } 
