@@ -1,0 +1,27 @@
+Structure - rendering pipeline:
+
+    I. Data loading:
+        - vertex_loader 
+        - texture_loader
+    
+    II. Project verticies:
+        - (helper) matmult (vertex * 3x3)
+        - viewoport_transform (offset rendered objects by a constant to fit into viewport)
+
+    III. Render no1 (resource light):
+        - viewport_setup
+        - vertex_render (render verticies onto viewport loaded into memory from viewport_setup)
+        - triangle_mesh_render (render triangles - optimization: create a rendering stack for distance from subject)
+        - (helper) line_render 
+
+    IV. Render no2 (resource heavy):
+        - (optimization) filter_surfaces_in_viewport 
+        - (optimization) filter_surfaces_by_distance (very resource heavy, apply for each rendered vertex)
+        - map_textures_to_surfaces
+
+    V. Draw:
+        - draw_viewport_to_file
+
+    (VI. Control:)
+        - load_user_input
+        - game_loop
