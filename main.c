@@ -11,11 +11,13 @@
 #define PROJECTION_SCALE 5
 #define PROJECTION_OFFSET_XY -20
 
+
+#define Z_PIXEL_BUFFER_LENGTH 8
 #define SCREEN_WIDTH 50
 #define SCREEN_HEIGTH 50
 
 
-void rotation_matrix_x(float* output_matrix, float theta) {
+void rotation_matrix_x(float* output_matrix, float theta) { //theta is in radians
   float _matrix[3][3] = {{1, 0, 0},
     {0, cos(theta), -sin(theta)},
     {0, sin(theta), cos(theta)}};
@@ -27,7 +29,6 @@ void matmult(const float vec[3], const float mat[3][3], float result[3]) {
     result[i] = 0.0f;
     for (int j = 0; j < 3; j++) {
       result[i] += vec[j] * mat[j][i]; // Note: Vector is treated as a row vector
-      //
     }
   }
 }
@@ -95,16 +96,16 @@ void rotate_and_project(int* output_data, int* data, int data_size, float rotati
     data_buffer[1] = data[3 * i + 1];
     data_buffer[2] = data[3 * i + 2];
 
-    printf("Buffer: %f %f %f\n", data_buffer[0], data_buffer[1], data_buffer[2]);
+    // printf("Buffer: %f %f %f\n", data_buffer[0], data_buffer[1], data_buffer[2]);
 
     // TODO: magic matrix multiplication step
     matmult(data_buffer, rot_x, data_buffer_rotated);
 
-    output_data[2 * i + 0] = (data_buffer[0] / data_buffer[2]) * PROJECTION_SCALE;
-    output_data[2 * i + 1] = (data_buffer[1] / data_buffer[2]) * PROJECTION_SCALE;
+    output_data[2 * i + 0] = (data_buffer_rotated[0] / data_buffer_rotated[2]) * PROJECTION_SCALE;
+    output_data[2 * i + 1] = (data_buffer_rotated[1] / data_buffer_rotated[2]) * PROJECTION_SCALE;
 
 
-    printf("output data: %f %f\n", output_data[0], output_data[1]);
+    // printf("output data: %f %f\n", output_data[0], output_data[1]);
 
   }
 }
@@ -126,13 +127,21 @@ void render_verticies(int* vertex_data, int data_size, FILE* stream) {
   }
 }
 
+
+void *viewport_setup() {  //DANGER: memory freeing needed
+  // todo add pixel data color support
+  void *viewport = malloc(sizeof(char) * SCREEN_HEIGTH * SCREEN_WIDTH * Z_PIXEL_BUFFER_LENGTH);
+
+  return viewport;
+} 
+
 //TODO: render triangles
 
 
 int main(void)
 {
   printf("starting program\n");
-  /*int buffer_size = 0;
+  int buffer_size = 0;
   int *raw_data = load_vertex_from_file(&buffer_size);
   printf("Size of allocated buffer: %i\n", buffer_size);
 
@@ -140,9 +149,8 @@ int main(void)
     printf("%i %i %i\n", raw_data[3 * i + 0], raw_data[3 * i + 1], raw_data[3 * i + 2]);
   }
 
-  int* projected_data = malloc(buffer_size * sizeof(int[2]));
+  /*int* projected_data = malloc(buffer_size * sizeof(int[2]));
   if (projected_data == NULL) fprintf(stderr, "Failed to allocate memory for projected data.\n");
-  float rotation[3] = {1, 0, 0};
   printf("Rotating and projecting... \n");
   rotate_and_project(projected_data, raw_data, buffer_size, rotation);
 
@@ -151,11 +159,56 @@ int main(void)
   }
 
   printf("Rendering... \n");
-  FILE *file = fopen(OUT_FILE, "w");
-  render_verticies(projected_data, buffer_size, file);
+  // FILE *file = fopen(OUT_FILE, "w");
+  render_verticies(projected_data, buffer_size, stdout);
 
   free(projected_data);
   free(raw_data);*/ 
+
+
+
+  char key_buffer[KEYBOARD_BUFFER_LENGTH] = {0};
+  float rotation[3] = {0, 0, 0};
+
+  while (true) {
+    update_key_buffer(key_buffer);
+
+    if (key_buffer[0] != 0) {
+      switch (key_buffer[0]) {
+        case 'a':
+          rotation[1] += 0.1;
+          break;
+        case 'd':
+          rotation[1] -= 0.1;
+          break;
+
+        case 'w':
+          rotation[0] -= 0.1;
+          break;
+        case 's':
+          rotation[0] += 0.1;
+          break;
+      }
+      key_buffer[0] = 0;
+
+
+      int* projected_data = malloc(buffer_size * sizeof(int[2]));
+      if (projected_data == NULL) fprintf(stderr, "Failed to allocate memory for projected data.\n");
+      // printf("Rotating and projecting... \n");
+      rotate_and_project(projected_data, raw_data, buffer_size, rotation);
+
+      /*for (int i = 0; i < buffer_size; i++) {
+        printf("%i %i\n", projected_data[2 * i + 0], projected_data[2 * i + 1]);
+      }*/
+
+      // FILE *file = fopen(OUT_FILE, "w");
+      printf("\e[1;1H\e[2J"); // pouze linux, zbavit se co nejdrive to pujde
+
+      render_verticies(projected_data, buffer_size, stdout);
+
+      free(projected_data);
+    }
+  }
 
   /*char key_buffer[KEYBOARD_BUFFER_LENGTH] = {0};
   while (true) {
@@ -163,5 +216,8 @@ int main(void)
     printf("buffer: %c %c %c\n", key_buffer[0], key_buffer[1], key_buffer[2]);
   }*/
 
+
+
+  free(raw_data); 
   return 0;
 }
