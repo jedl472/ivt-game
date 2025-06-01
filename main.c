@@ -3,6 +3,8 @@
 #include <math.h>
 #include <string.h>
 
+#include "control_linux.h" //TODO urgent: pridat win podporu
+
 #define VERTEX_FILE "cube.txt"
 #define OUT_FILE "rendered.txt"
 
@@ -15,19 +17,19 @@
 
 void rotation_matrix_x(float* output_matrix, float theta) {
   float _matrix[3][3] = {{1, 0, 0},
-                         {0, cos(theta), -sin(theta)},
-                         {0, sin(theta), cos(theta)}};
+    {0, cos(theta), -sin(theta)},
+    {0, sin(theta), cos(theta)}};
   memcpy(output_matrix, _matrix, sizeof _matrix);
 } 
 
 void matmult(const float vec[3], const float mat[3][3], float result[3]) {
-    for (int i = 0; i < 3; i++) {
-        result[i] = 0.0f;
-        for (int j = 0; j < 3; j++) {
-            result[i] += vec[j] * mat[j][i]; // Note: Vector is treated as a row vector
+  for (int i = 0; i < 3; i++) {
+    result[i] = 0.0f;
+    for (int j = 0; j < 3; j++) {
+      result[i] += vec[j] * mat[j][i]; // Note: Vector is treated as a row vector
       //
-        }
     }
+  }
 }
 
 int *load_vertex_from_file(int *buffer_size) {
@@ -44,7 +46,7 @@ int *load_vertex_from_file(int *buffer_size) {
   }
   data = malloc(data_size * sizeof vertex_value);
 
-  
+
   if(data == NULL) {
     fprintf(stderr, "Failed to allocate initial buffer memory.\n");
     return NULL;
@@ -63,14 +65,14 @@ int *load_vertex_from_file(int *buffer_size) {
       }
       data = new_data;
     }
-    
+
     memcpy(data + (data_index * sizeof vertex_value), vertex_value, sizeof vertex_value); 
 
     data_index++;
   }
-  
+
   *buffer_size = data_index;
- 
+
   data = realloc(data, data_index * sizeof(vertex_value));
   if (data == NULL) {
     fprintf(stderr, "Failed to reallocate file buffer memory.\n");
@@ -85,7 +87,7 @@ void rotate_and_project(int* output_data, int* data, int data_size, float rotati
 
   float rot_x[3][3];
   rotation_matrix_x(*rot_x, rotation[0]);
-  
+
   for (int i = 0; i < data_size; i++) {
     // printf("data\n");
 
@@ -103,7 +105,7 @@ void rotate_and_project(int* output_data, int* data, int data_size, float rotati
 
 
     printf("output data: %f %f\n", output_data[0], output_data[1]);
-    
+
   }
 }
 
@@ -126,16 +128,18 @@ void render_verticies(int* vertex_data, int data_size, FILE* stream) {
 
 //TODO: render triangles
 
+
 int main(void)
 {
-  int buffer_size = 0;
+  printf("starting program\n");
+  /*int buffer_size = 0;
   int *raw_data = load_vertex_from_file(&buffer_size);
   printf("Size of allocated buffer: %i\n", buffer_size);
 
   for (int i = 0; i < buffer_size; i++) {
     printf("%i %i %i\n", raw_data[3 * i + 0], raw_data[3 * i + 1], raw_data[3 * i + 2]);
   }
- 
+
   int* projected_data = malloc(buffer_size * sizeof(int[2]));
   if (projected_data == NULL) fprintf(stderr, "Failed to allocate memory for projected data.\n");
   float rotation[3] = {1, 0, 0};
@@ -149,8 +153,15 @@ int main(void)
   printf("Rendering... \n");
   FILE *file = fopen(OUT_FILE, "w");
   render_verticies(projected_data, buffer_size, file);
-  
+
   free(projected_data);
-  free(raw_data); 
+  free(raw_data);*/ 
+
+  /*char key_buffer[KEYBOARD_BUFFER_LENGTH] = {0};
+  while (true) {
+    update_key_buffer(key_buffer);
+    printf("buffer: %c %c %c\n", key_buffer[0], key_buffer[1], key_buffer[2]);
+  }*/
+
   return 0;
 }
