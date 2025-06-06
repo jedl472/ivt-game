@@ -19,8 +19,22 @@
 
 void rotation_matrix_x(float* output_matrix, float theta) { //theta is in radians
   float _matrix[3][3] = {{1, 0, 0},
-    {0, cos(theta), -sin(theta)},
-    {0, sin(theta), cos(theta)}};
+                        {0, cos(theta), -sin(theta)},
+                        {0, sin(theta), cos(theta)}};
+  memcpy(output_matrix, _matrix, sizeof _matrix);
+} 
+
+void rotation_matrix_y(float* output_matrix, float theta) {
+  float _matrix[3][3] = {{cos(theta), 0, sin(theta)},
+                        {0, 1, 0},
+                        {-sin(theta), 0, cos(theta)}};
+  memcpy(output_matrix, _matrix, sizeof _matrix);
+} 
+
+void rotation_matrix_z(float* output_matrix, float theta) {
+  float _matrix[3][3] = {{cos(theta), -sin(theta), 0},
+                        {sin(theta), cos(theta), 0},
+                        {0, 0, 1}};
   memcpy(output_matrix, _matrix, sizeof _matrix);
 } 
 
@@ -88,6 +102,10 @@ void rotate_and_project(int* output_data, int* data, int data_size, float rotati
 
   float rot_x[3][3];
   rotation_matrix_x(*rot_x, rotation[0]);
+  float rot_y[3][3];
+  rotation_matrix_y(*rot_y, rotation[1]);
+  float rot_z[3][3];
+  rotation_matrix_z(*rot_z, rotation[2]);
 
   for (int i = 0; i < data_size; i++) {
     // printf("data\n");
@@ -98,8 +116,10 @@ void rotate_and_project(int* output_data, int* data, int data_size, float rotati
 
     // printf("Buffer: %f %f %f\n", data_buffer[0], data_buffer[1], data_buffer[2]);
 
-    // TODO: magic matrix multiplication step
+    // TODO: Tohle je tak neuvěřitelně strašnej hack
     matmult(data_buffer, rot_x, data_buffer_rotated);
+    matmult(data_buffer_rotated, rot_y, data_buffer);
+    matmult(data_buffer, rot_z, data_buffer_rotated);
 
     output_data[2 * i + 0] = (data_buffer_rotated[0] / data_buffer_rotated[2]) * PROJECTION_SCALE;
     output_data[2 * i + 1] = (data_buffer_rotated[1] / data_buffer_rotated[2]) * PROJECTION_SCALE;
@@ -113,7 +133,7 @@ void rotate_and_project(int* output_data, int* data, int data_size, float rotati
 void render_verticies(int* vertex_data, int data_size, FILE* stream) {
   char row[SCREEN_WIDTH * 2 + 1] = {0};
   for (int y = 0; y < SCREEN_HEIGTH; y++) {
-    for (int i = 0; i < SCREEN_WIDTH; i++) { row[i*2] = '.'; }
+    for (int i = 0; i < SCREEN_WIDTH; i++) { row[i*2] = ' '; /*filler znak prijde zde*/ }
     for (int x = 0; x < SCREEN_WIDTH; x++) {
       for (int i = 0; i < data_size; i++) {
         // printf(" tested x: %i %i tested y: %i %i\n", vertex_data[2 * i + 0], x, vertex_data[2 * i + 1], y);
