@@ -3,8 +3,8 @@
 #include <stdio.h>
 #endif
 
-#define SCREEN_WIDTH 50  // TODO akutne: fixnout velikost viewportu
-#define SCREEN_HEIGTH 50
+#define SCREEN_WIDTH 20  // TODO: opravit ze jsou prohozeene 
+#define SCREEN_HEIGTH 40
 
 #ifndef RENDERER_H
 #define RENDERER_H

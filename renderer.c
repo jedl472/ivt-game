@@ -20,8 +20,8 @@
 #include <string.h>
 #endif
 
-int projection_offset[2] = {20, 20};
-int projection_scale = 3;
+int projection_offset[2] = {10, 20};
+int projection_scale = 2;
 
 int render_offset_position[3] = {0};
 float render_offset_rotation[3] = {0}; 
@@ -67,7 +67,7 @@ void *renderer_viewport_setup() {  //DANGER: memory freeing needed
 
 void clear_viewport(void *viewport) {
   for (unsigned int i = 0; i < sizeof(char) * SCREEN_HEIGTH * SCREEN_WIDTH; i++) {
-    ((char*)viewport)[i] = ' ';
+    ((char*)viewport)[i] = '.';
   }
 }
 
@@ -97,9 +97,9 @@ void renderer_draw(void *viewport, FILE* stream) { //TODO: byl jsem linej kdyz j
     }
   }*/
 
-  for (int y = 0; y < SCREEN_HEIGTH; y++) {
+  for (int y = 0; y < SCREEN_WIDTH; y++) {
     for (int x = 0; x < SCREEN_HEIGTH; x++) {
-      fprintf(stream, "%c ", ((char*)viewport)[(y * SCREEN_WIDTH) + x]);
+      fprintf(stream, "%c ", ((char*)viewport)[(y * SCREEN_HEIGTH) + x]);
     }
     fprintf(stream, "\n");
   }
@@ -137,7 +137,7 @@ void renderer_vertex_pipeline(int *loaded_vertex_data, int loaded_data_length, v
     projected_coordinates[0] = ((vertex_buffer_rotated[0] / vertex_buffer_rotated[2]) * projection_scale) + projection_offset[0];
     projected_coordinates[1] = ((vertex_buffer_rotated[1] / vertex_buffer_rotated[2]) * projection_scale) + projection_offset[1];
     // printf("pipeline: %i %i\n", projected_coordinates[0], projected_coordinates[1]);
-    if (0 <= projected_coordinates[0] && projected_coordinates[0] < SCREEN_HEIGTH && 0 <= projected_coordinates[1] && projected_coordinates[1] < SCREEN_WIDTH) {
+    if (0 <= projected_coordinates[0] && projected_coordinates[0] < SCREEN_WIDTH && 0 <= projected_coordinates[1] && projected_coordinates[1] < SCREEN_HEIGTH) {
       ((char*)viewport)[(projected_coordinates[0] * sizeof(char) * SCREEN_HEIGTH) + (projected_coordinates[1] * sizeof(char))] = 'X';
     }    
 
