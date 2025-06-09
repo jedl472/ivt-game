@@ -72,31 +72,6 @@ void clear_viewport(void *viewport) {
 }
 
 void renderer_draw(void *viewport, FILE* stream) { //TODO: byl jsem linej kdyz jsem toto psal
-  /*char row[SCREEN_WIDTH * 2 + 1] = {0};
-  for (int y = 0; y < SCREEN_HEIGTH; y++) {
-    for (int i = 0; i < SCREEN_WIDTH; i++) { row[i*2] = ' '; } // filler znak prijde zde
-    for (int x = 0; x < SCREEN_WIDTH; x++) {
-      // printf(" tested x: %i %i tested y: %i %i\n", vertex_data[2 * i + 0], x, vertex_data[2 * i + 1], y);
-      if ((((char*)viewport)[(y * SCREEN_WIDTH) + x] == 'X')) {
-        row[x*2] = 'x';
-      }
-      row[x*2 + 1] = ' ';
-    }
-    fprintf(stream, "%s\n", row);
-  }
-  
-  char row[(SCREEN_WIDTH * 2) + 1 + 2];
-
-  row[(SCREEN_WIDTH * 2) + 1 + 0] = '\';
-  row[(SCREEN_WIDTH * 2) + 1 + 1] = 'n';
-
-  for (int y = 0; y < SCREEN_HEIGTH; y++) {
-    for (int i = 0; i < SCREEN_WIDTH * 2 + 1; i++) { row[i] = ' '; } // clear row
-    for (int x = 0; x < SCREEN_WIDTH; x++) {
-      row[x*2] = ((char*)viewport)[(y * SCREEN_WIDTH) + x];
-    }
-  }*/
-
   for (int y = 0; y < SCREEN_WIDTH; y++) {
     for (int x = 0; x < SCREEN_HEIGTH; x++) {
       fprintf(stream, "%c ", ((char*)viewport)[(y * SCREEN_HEIGTH) + x]);
@@ -104,6 +79,10 @@ void renderer_draw(void *viewport, FILE* stream) { //TODO: byl jsem linej kdyz j
     fprintf(stream, "\n");
   }
 
+}
+
+void _draw_line(void *viewport, int a[2], int b[2]) {
+  // Bresenhamuv algoritmus rasterizace car: https://classic.csunplugged.org/documents/activities/community-activities/line-drawing/line-drawing.pdf
 }
 
 void renderer_vertex_pipeline(int *loaded_vertex_data, int loaded_data_length, void *viewport) {
