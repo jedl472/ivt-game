@@ -3,9 +3,10 @@
 #include <stdio.h>
 #endif
 
-#define SCREEN_WIDTH 20  // TODO: opravit ze jsou prohozeene 
-#define SCREEN_HEIGTH 40
-#define RENDERER_FILLER_CHAR '#'
+#define SCREEN_WIDTH 30  // TODO: opravit ze jsou prohozeene 
+#define SCREEN_HEIGTH 60
+#define RENDERER_VERTEX_CHAR '#'
+#define RENDERER_FILLER_CHAR ' '
 
 
 #ifndef RENDERER_H

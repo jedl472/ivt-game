@@ -88,17 +88,33 @@ int main(void)
 
     if (key_buffer[0] != 0) {
       switch (key_buffer[0]) {
+        // POHYB
         case 'a':
-          render_offset_rotation[1] += 0.1;
+          render_offset_position[1] += 1;
           break;
         case 'd':
-          render_offset_rotation[1] -= 0.1;
+          render_offset_position[1] -= 1;
           break;
 
         case 'w':
-          render_offset_rotation[0] -= 0.1;
+          render_offset_position[2] -= 1;
           break;
         case 's':
+          render_offset_position[2] += 1;
+          break;
+
+        // ROTACE
+        case 'k':
+          render_offset_rotation[1] += 0.1;
+          break;
+        case 'i':
+          render_offset_rotation[1] -= 0.1;
+          break;
+
+        case 'j':
+          render_offset_rotation[0] -= 0.1;
+          break;
+        case 'l':
           render_offset_rotation[0] += 0.1;
           break;
       }

@@ -20,7 +20,7 @@
 #include <string.h>
 #endif
 
-int projection_offset[2] = {10, 20};
+int projection_offset[2] = {20, 0};
 int projection_scale = 2;
 
 int render_offset_position[3] = {0};
@@ -67,7 +67,7 @@ void *renderer_viewport_setup() {  //DANGER: memory freeing needed
 
 void _clear_viewport(void *viewport) {
   for (unsigned int i = 0; i < sizeof(char) * SCREEN_HEIGTH * SCREEN_WIDTH; i++) {
-    ((char*)viewport)[i] = '.';
+    ((char*)viewport)[i] = RENDERER_FILLER_CHAR;
   }
 }
 
@@ -97,7 +97,7 @@ void _render_line(void *viewport, int a[2], int b[2]) {
   int y = y0;
 
   for (int x = x0; x < x1; x++) {
-    ((char*)viewport)[(x * sizeof(char) * SCREEN_HEIGTH) + (y * sizeof(char))] = RENDERER_FILLER_CHAR;
+    ((char*)viewport)[(x * sizeof(char) * SCREEN_HEIGTH) + (y * sizeof(char))] = RENDERER_VERTEX_CHAR;
     if (D > 0) {
       y = y + 1;
       D = D - 2*dx;
@@ -110,7 +110,7 @@ void _render_verticies(void *viewport, int data[][2], int data_buffer_length) {
   for (int i = 0; i < data_buffer_length; i++) { 
     if (data[i][0] != -1) {
       printf("%i: %i %i\n", i, data[i][0], data[i][1]);
-      ((char*)viewport)[(data[i][0] * sizeof(char) * SCREEN_HEIGTH) + (data[i][1] * sizeof(char))] = RENDERER_FILLER_CHAR;
+      ((char*)viewport)[(data[i][0] * sizeof(char) * SCREEN_HEIGTH) + (data[i][1] * sizeof(char))] = RENDERER_VERTEX_CHAR;
     }
   }
 }
@@ -148,6 +148,7 @@ void renderer_vertex_pipeline(int *loaded_vertex_data, int loaded_data_length, v
     
     projected_coordinates[0] = ((vertex_buffer_rotated[0] / vertex_buffer_rotated[2]) * projection_scale) + projection_offset[0];
     projected_coordinates[1] = ((vertex_buffer_rotated[1] / vertex_buffer_rotated[2]) * projection_scale) + projection_offset[1];
+
     printf("pipeline: %i %i\n", projected_coordinates[0], projected_coordinates[1]);
     if (0 <= projected_coordinates[0] && projected_coordinates[0] < SCREEN_WIDTH && 0 <= projected_coordinates[1] && projected_coordinates[1] < SCREEN_HEIGTH) {
       rendered_verticies[i][0] = projected_coordinates[0];
@@ -156,6 +157,9 @@ void renderer_vertex_pipeline(int *loaded_vertex_data, int loaded_data_length, v
       rendered_verticies[i][0] = -1; rendered_verticies[i][1] = -1;
     }
   }
+  // printf("%i %i\n", (&(loaded_vertex_data[0]))[0], (&(loaded_vertex_data[1]))[1]);
+  // _render_line(viewport, rendered_verticies[0], rendered_verticies[1]);
+
   _render_verticies(viewport, rendered_verticies, loaded_data_length);
 
   free(rendered_verticies);
