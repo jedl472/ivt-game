@@ -104,10 +104,10 @@ int main(void)
       }
       key_buffer[0] = 0;
 
-      // renderer_vertex_pipeline(raw_data, raw_data_buffer_size, viewport);
-      int a[2] = {1, 2};
-      int b[2] = {20, 20};
-      _render_line(viewport, b, a);
+      renderer_vertex_pipeline(raw_data, raw_data_buffer_size, viewport);
+      // int a[2] = {1, 2};
+      // int b[2] = {20, 20};
+      // _render_line(viewport, b, a);
 
       printf("\e[1;1H\e[2J"); // pouze linux, zbavit se co nejdrive to pujde
       renderer_draw_viewport(viewport, stdout);

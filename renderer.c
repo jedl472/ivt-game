@@ -84,7 +84,7 @@ void renderer_draw_viewport(void *viewport, FILE* stream) { //TODO: byl jsem lin
 void _render_line(void *viewport, int a[2], int b[2]) {
   // Bresenhamuv algoritmus rasterizace car: https://classic.csunplugged.org/documents/activities/community-activities/line-drawing/line-drawing.pdf
   int x0; int x1; int y0; int y1;
-  if (x0 > x1) {
+  if (a[0] > b[0]) {
     x0 = b[0]; x1 = a[0]; y0 = b[1]; y1 = a[1];
   } else {
     x0 = a[0]; x1 = b[0]; y0 = a[1]; y1 = b[1];
@@ -106,9 +106,12 @@ void _render_line(void *viewport, int a[2], int b[2]) {
   }
 }
 
-void _render_vertex(int data[][2], int data_buffer_length) {
-  for (int i = 0; i < data_buffer_length; ) {
-  
+void _render_verticies(void *viewport, int data[][2], int data_buffer_length) {
+  for (int i = 0; i < data_buffer_length; i++) { 
+    if (data[i][0] != -1) {
+      printf("%i: %i %i\n", i, data[i][0], data[i][1]);
+      ((char*)viewport)[(data[i][0] * sizeof(char) * SCREEN_HEIGTH) + (data[i][1] * sizeof(char))] = RENDERER_FILLER_CHAR;
+    }
   }
 }
 
@@ -127,6 +130,9 @@ void renderer_vertex_pipeline(int *loaded_vertex_data, int loaded_data_length, v
   float rot_z[3][3];
   _rotation_matrix_z(*rot_z, render_offset_rotation[2]);
 
+  int (*rendered_verticies)[2] = malloc(loaded_data_length * 2 * sizeof(int));
+  if(rendered_verticies == NULL) { fprintf(stderr, "Could not allocate %i bytes for rendered_verticies_container in render_vertex_pipeline (renderer.c)\n", loaded_data_length * 2 * (int)sizeof(int)); }
+
   for (int i = 0; i < loaded_data_length; i++) { // iteruje skrze vsechny vertexy
     for (int xyz = 0; xyz < 3; xyz++) {
       vertex_buffer[xyz] = loaded_vertex_data[3 * i + xyz] + render_offset_position[xyz];    // nacte vertex do docasneho bufferu a aplikuje offset pozice
@@ -142,10 +148,18 @@ void renderer_vertex_pipeline(int *loaded_vertex_data, int loaded_data_length, v
     
     projected_coordinates[0] = ((vertex_buffer_rotated[0] / vertex_buffer_rotated[2]) * projection_scale) + projection_offset[0];
     projected_coordinates[1] = ((vertex_buffer_rotated[1] / vertex_buffer_rotated[2]) * projection_scale) + projection_offset[1];
-    // printf("pipeline: %i %i\n", projected_coordinates[0], projected_coordinates[1]);
+    printf("pipeline: %i %i\n", projected_coordinates[0], projected_coordinates[1]);
     if (0 <= projected_coordinates[0] && projected_coordinates[0] < SCREEN_WIDTH && 0 <= projected_coordinates[1] && projected_coordinates[1] < SCREEN_HEIGTH) {
-      ((char*)viewport)[(projected_coordinates[0] * sizeof(char) * SCREEN_HEIGTH) + (projected_coordinates[1] * sizeof(char))] = RENDERER_FILLER_CHAR;
-    }    
-
+      rendered_verticies[i][0] = projected_coordinates[0];
+      rendered_verticies[i][1] = projected_coordinates[1];
+    } else {
+      rendered_verticies[i][0] = -1; rendered_verticies[i][1] = -1;
+    }
   }
+  _render_verticies(viewport, rendered_verticies, loaded_data_length);
+
+  free(rendered_verticies);
+  
+  printf("loaded data: %i \n", loaded_data_length);
+  
 }

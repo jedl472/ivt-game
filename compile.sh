@@ -1,1 +1,1 @@
-clear && gcc main.c control_linux.c renderer.c -o main.out -Wall -Wextra --std=c23 -pedantic -lm && valgrind ./main.out
+clear && gcc main.c renderer.c control_linux.c -o main.out -g -Wall -Wextra -lm -I /root/ivt-game-repomain.out
