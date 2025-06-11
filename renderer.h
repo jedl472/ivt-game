@@ -5,6 +5,8 @@
 
 #define SCREEN_WIDTH 20  // TODO: opravit ze jsou prohozeene 
 #define SCREEN_HEIGTH 40
+#define RENDERER_FILLER_CHAR '#'
+
 
 #ifndef RENDERER_H
 #define RENDERER_H
@@ -17,6 +19,10 @@ void renderer_vertex_pipeline(int *loaded_vertex_data, int loaded_data_length, v
 
 void *renderer_viewport_setup();  //DANGER: memory freeing needed
 
-void renderer_draw(void *viewport, FILE* stream);
+void renderer_draw_viewport(void *viewport, FILE* stream);
+
+// temp 
+
+void _render_line(void *viewport, int a[2], int b[2]);
 
 #endif

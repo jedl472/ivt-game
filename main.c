@@ -8,11 +8,6 @@
 #include <stdlib.h>
 #endif
 
-#ifndef MATH_H
-#define MATH_H
-#include <math.h>
-#endif
-
 #ifndef STRING_H
 #define STRING_H
 #include <string.h>
@@ -88,7 +83,7 @@ int main(void)
 
   char key_buffer[KEYBOARD_BUFFER_LENGTH] = {0};
 
-  while (true) {
+  while (1) {
     update_key_buffer(key_buffer);
 
     if (key_buffer[0] != 0) {
@@ -109,10 +104,13 @@ int main(void)
       }
       key_buffer[0] = 0;
 
-      renderer_vertex_pipeline(raw_data, raw_data_buffer_size, viewport);
-      
+      // renderer_vertex_pipeline(raw_data, raw_data_buffer_size, viewport);
+      int a[2] = {1, 2};
+      int b[2] = {20, 20};
+      _render_line(viewport, b, a);
+
       printf("\e[1;1H\e[2J"); // pouze linux, zbavit se co nejdrive to pujde
-      renderer_draw(viewport, stdout);
+      renderer_draw_viewport(viewport, stdout);
     }
   }
 

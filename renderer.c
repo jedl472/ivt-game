@@ -27,28 +27,28 @@ int render_offset_position[3] = {0};
 float render_offset_rotation[3] = {0}; 
 
 
-void rotation_matrix_x(float* output_matrix, float theta) { //theta is in radians
+void _rotation_matrix_x(float* output_matrix, float theta) { //theta is in radians
   float _matrix[3][3] = {{1, 0, 0},
                         {0, cos(theta), -sin(theta)},
                         {0, sin(theta), cos(theta)}};
   memcpy(output_matrix, _matrix, sizeof _matrix);
 } 
 
-void rotation_matrix_y(float* output_matrix, float theta) {
+void _rotation_matrix_y(float* output_matrix, float theta) {
   float _matrix[3][3] = {{cos(theta), 0, sin(theta)},
                         {0, 1, 0},
                         {-sin(theta), 0, cos(theta)}};
   memcpy(output_matrix, _matrix, sizeof _matrix);
 } 
 
-void rotation_matrix_z(float* output_matrix, float theta) {
+void _rotation_matrix_z(float* output_matrix, float theta) {
   float _matrix[3][3] = {{cos(theta), -sin(theta), 0},
                         {sin(theta), cos(theta), 0},
                         {0, 0, 1}};
   memcpy(output_matrix, _matrix, sizeof _matrix);
 } 
 
-void matmult(const float vec[3], const float mat[3][3], float result[3]) {
+void _matmult(const float vec[3], const float mat[3][3], float result[3]) {
   for (int i = 0; i < 3; i++) {
     result[i] = 0.0f;
     for (int j = 0; j < 3; j++) {
@@ -65,13 +65,13 @@ void *renderer_viewport_setup() {  //DANGER: memory freeing needed
   return viewport;
 }
 
-void clear_viewport(void *viewport) {
+void _clear_viewport(void *viewport) {
   for (unsigned int i = 0; i < sizeof(char) * SCREEN_HEIGTH * SCREEN_WIDTH; i++) {
     ((char*)viewport)[i] = '.';
   }
 }
 
-void renderer_draw(void *viewport, FILE* stream) { //TODO: byl jsem linej kdyz jsem toto psal
+void renderer_draw_viewport(void *viewport, FILE* stream) { //TODO: byl jsem linej kdyz jsem toto psal
   for (int y = 0; y < SCREEN_WIDTH; y++) {
     for (int x = 0; x < SCREEN_HEIGTH; x++) {
       fprintf(stream, "%c ", ((char*)viewport)[(y * SCREEN_HEIGTH) + x]);
@@ -81,12 +81,39 @@ void renderer_draw(void *viewport, FILE* stream) { //TODO: byl jsem linej kdyz j
 
 }
 
-void _draw_line(void *viewport, int a[2], int b[2]) {
+void _render_line(void *viewport, int a[2], int b[2]) {
   // Bresenhamuv algoritmus rasterizace car: https://classic.csunplugged.org/documents/activities/community-activities/line-drawing/line-drawing.pdf
+  int x0; int x1; int y0; int y1;
+  if (x0 > x1) {
+    x0 = b[0]; x1 = a[0]; y0 = b[1]; y1 = a[1];
+  } else {
+    x0 = a[0]; x1 = b[0]; y0 = a[1]; y1 = b[1];
+  }
+
+  int dx = x1 - x0;
+  int dy = y1 - y0;
+
+  int D = 2*dy - dx;
+  int y = y0;
+
+  for (int x = x0; x < x1; x++) {
+    ((char*)viewport)[(x * sizeof(char) * SCREEN_HEIGTH) + (y * sizeof(char))] = RENDERER_FILLER_CHAR;
+    if (D > 0) {
+      y = y + 1;
+      D = D - 2*dx;
+    }
+    D = D + 2*dy;
+  }
+}
+
+void _render_vertex(int data[][2], int data_buffer_length) {
+  for (int i = 0; i < data_buffer_length; ) {
+  
+  }
 }
 
 void renderer_vertex_pipeline(int *loaded_vertex_data, int loaded_data_length, void *viewport) {
-  clear_viewport(viewport);
+  _clear_viewport(viewport);
 
   float vertex_buffer[3];
   float vertex_buffer_rotated[3];
@@ -94,11 +121,11 @@ void renderer_vertex_pipeline(int *loaded_vertex_data, int loaded_data_length, v
 
 
   float rot_x[3][3];
-  rotation_matrix_x(*rot_x, render_offset_rotation[0]);
+  _rotation_matrix_x(*rot_x, render_offset_rotation[0]);
   float rot_y[3][3];
-  rotation_matrix_y(*rot_y, render_offset_rotation[1]);
+  _rotation_matrix_y(*rot_y, render_offset_rotation[1]);
   float rot_z[3][3];
-  rotation_matrix_z(*rot_z, render_offset_rotation[2]);
+  _rotation_matrix_z(*rot_z, render_offset_rotation[2]);
 
   for (int i = 0; i < loaded_data_length; i++) { // iteruje skrze vsechny vertexy
     for (int xyz = 0; xyz < 3; xyz++) {
@@ -106,9 +133,9 @@ void renderer_vertex_pipeline(int *loaded_vertex_data, int loaded_data_length, v
     }
 
     // TODO: opravit tenhle hack hack
-    matmult(vertex_buffer, rot_x, vertex_buffer_rotated);                        // aplikuje offset rotace
-    matmult(vertex_buffer_rotated, rot_y, vertex_buffer);
-    matmult(vertex_buffer, rot_z, vertex_buffer_rotated);
+    _matmult(vertex_buffer, rot_x, vertex_buffer_rotated);                        // aplikuje offset rotace
+    _matmult(vertex_buffer_rotated, rot_y, vertex_buffer);
+    _matmult(vertex_buffer, rot_z, vertex_buffer_rotated);
 
     // output_data[2 * i + 0] = (data_buffer_rotated[0] / data_buffer_rotated[2]) * projection_scale;
     // output_data[2 * i + 1] = (data_buffer_rotated[1] / data_buffer_rotated[2]) * projection_scale;
@@ -117,7 +144,7 @@ void renderer_vertex_pipeline(int *loaded_vertex_data, int loaded_data_length, v
     projected_coordinates[1] = ((vertex_buffer_rotated[1] / vertex_buffer_rotated[2]) * projection_scale) + projection_offset[1];
     // printf("pipeline: %i %i\n", projected_coordinates[0], projected_coordinates[1]);
     if (0 <= projected_coordinates[0] && projected_coordinates[0] < SCREEN_WIDTH && 0 <= projected_coordinates[1] && projected_coordinates[1] < SCREEN_HEIGTH) {
-      ((char*)viewport)[(projected_coordinates[0] * sizeof(char) * SCREEN_HEIGTH) + (projected_coordinates[1] * sizeof(char))] = 'X';
+      ((char*)viewport)[(projected_coordinates[0] * sizeof(char) * SCREEN_HEIGTH) + (projected_coordinates[1] * sizeof(char))] = RENDERER_FILLER_CHAR;
     }    
 
   }
