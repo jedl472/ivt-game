@@ -20,7 +20,7 @@
 #include <string.h>
 #endif
 
-int projection_offset[2] = {20, 0};
+int projection_offset[2] = {20, 30};
 int projection_scale = 2;
 
 int render_offset_position[3] = {0};
@@ -91,10 +91,17 @@ void _render_line(void *viewport, int a[2], int b[2]) {
   }
 
   int dx = x1 - x0;
-  int dy = y1 - y0;
 
+  int dy; int y;
+  if(y1 > y0) {
+    dy = y1 - y0;
+    y = y0;
+  } else {
+    dy = y0 - y1;
+    y = y1;
+  }
+ 
   int D = 2*dy - dx;
-  int y = y0;
 
   for (int x = x0; x < x1; x++) {
     ((char*)viewport)[(x * sizeof(char) * SCREEN_HEIGTH) + (y * sizeof(char))] = RENDERER_VERTEX_CHAR;
@@ -115,7 +122,7 @@ void _render_verticies(void *viewport, int data[][2], int data_buffer_length) {
   }
 }
 
-void renderer_vertex_pipeline(int *loaded_vertex_data, int loaded_data_length, void *viewport) {
+void renderer_vertex_pipeline(int *loaded_vertex_data, int loaded_data_length, void *viewport, char TMP_render_lines) {
   _clear_viewport(viewport);
 
   float vertex_buffer[3];
@@ -138,7 +145,7 @@ void renderer_vertex_pipeline(int *loaded_vertex_data, int loaded_data_length, v
       vertex_buffer[xyz] = loaded_vertex_data[3 * i + xyz] + render_offset_position[xyz];    // nacte vertex do docasneho bufferu a aplikuje offset pozice
     }
 
-    // TODO: opravit tenhle hack hack
+    // TODO: opravit tenhle hack
     _matmult(vertex_buffer, rot_x, vertex_buffer_rotated);                        // aplikuje offset rotace
     _matmult(vertex_buffer_rotated, rot_y, vertex_buffer);
     _matmult(vertex_buffer, rot_z, vertex_buffer_rotated);
@@ -157,8 +164,12 @@ void renderer_vertex_pipeline(int *loaded_vertex_data, int loaded_data_length, v
       rendered_verticies[i][0] = -1; rendered_verticies[i][1] = -1;
     }
   }
-  // printf("%i %i\n", (&(loaded_vertex_data[0]))[0], (&(loaded_vertex_data[1]))[1]);
-  // _render_line(viewport, rendered_verticies[0], rendered_verticies[1]);
+
+  printf("%i %i\n", (&(loaded_vertex_data[0]))[0], (&(loaded_vertex_data[1]))[1]);
+  if (TMP_render_lines == 1) {
+    _render_line(viewport, rendered_verticies[0], rendered_verticies[1]);
+    _render_line(viewport, rendered_verticies[2], rendered_verticies[3]);
+  }
 
   _render_verticies(viewport, rendered_verticies, loaded_data_length);
 

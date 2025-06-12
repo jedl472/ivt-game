@@ -16,7 +16,7 @@ extern int render_offset_position[3];
 extern float render_offset_rotation[3]; 
  
 
-void renderer_vertex_pipeline(int *loaded_vertex_data, int loaded_data_length, void *viewport);
+void renderer_vertex_pipeline(int *loaded_vertex_data, int loaded_data_length, void *viewport, char TMP_render_lines);
 
 void *renderer_viewport_setup();  //DANGER: memory freeing needed
 

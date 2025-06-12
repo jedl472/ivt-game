@@ -73,6 +73,8 @@ int *load_vertex_from_file(int *buffer_size) {
 
 int main(void)
 {
+  // tmp:
+  char TMP_render_lines = 0;
   printf("starting program\n");
   int raw_data_buffer_size = 0;
   int *raw_data = load_vertex_from_file(&raw_data_buffer_size);
@@ -117,10 +119,15 @@ int main(void)
         case 'l':
           render_offset_rotation[0] += 0.1;
           break;
-      }
+
+        case 'r':
+          if (TMP_render_lines == 0) { TMP_render_lines = 1; }
+          else { TMP_render_lines = 0; }
+          break;
+      } 
       key_buffer[0] = 0;
 
-      renderer_vertex_pipeline(raw_data, raw_data_buffer_size, viewport);
+      renderer_vertex_pipeline(raw_data, raw_data_buffer_size, viewport, TMP_render_lines);
       // int a[2] = {1, 2};
       // int b[2] = {20, 20};
       // _render_line(viewport, b, a);
