@@ -81,7 +81,7 @@ void renderer_draw_viewport(void *viewport, FILE* stream) { //TODO: byl jsem lin
 
 }
 
-void _render_line(void *viewport, int a[2], int b[2]) {
+/*void _render_line(void *viewport, int a[2], int b[2]) {
   // Bresenhamuv algoritmus rasterizace car: https://classic.csunplugged.org/documents/activities/community-activities/line-drawing/line-drawing.pdf
   int x0; int x1; int y0; int y1;
   if (a[0] > b[0]) {
@@ -111,7 +111,39 @@ void _render_line(void *viewport, int a[2], int b[2]) {
     }
     D = D + 2*dy;
   }
+}*/
+
+void _render_line(void *viewport, int a[2], int b[2]) {
+    int x0 = a[0], y0 = a[1];
+    int x1 = b[0], y1 = b[1];
+
+    int dx = abs(x1 - x0);
+    int dy = abs(y1 - y0);
+
+    int sx = (x0 < x1) ? 1 : -1;
+    int sy = (y0 < y1) ? 1 : -1;
+
+    int err = dx - dy;
+
+    while (1) {
+        ((char*)viewport)[(x0 * sizeof(char) * SCREEN_HEIGTH) + (y0 * sizeof(char))] = RENDERER_VERTEX_CHAR;
+
+        if (x0 == x1 && y0 == y1) break;
+
+        int e2 = 2 * err;
+
+        if (e2 > -dy) {
+            err -= dy;
+            x0 += sx;
+        }
+
+        if (e2 < dx) {
+            err += dx;
+            y0 += sy;
+        }
+    }
 }
+
 
 void _render_verticies(void *viewport, int data[][2], int data_buffer_length) {
   for (int i = 0; i < data_buffer_length; i++) { 
